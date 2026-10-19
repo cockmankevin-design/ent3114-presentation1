@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PeptideChecker — Presentation 1</title>
+<meta name="description" content="Presentation 1 for PeptideChecker. ENT 3114 New Venture Laboratory, FGCU, Kevin Cockman.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{--bg:#0a0d14;--panel:#111724;--panel2:#161e2e;--line:#26314a;--text:#eef2f8;--muted:#a3afc2;--dim:#7d8aa0;--accent:#4d8dff;--good:#3ecf8e;--warn:#e0a940;--bad:#ff6b6b}
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--text);font:17px/1.6 Geist,system-ui,sans-serif;overflow:hidden}
+  .serif{font-family:"Instrument Serif",Georgia,serif;font-weight:400}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  #deck{height:100vh;height:100dvh;scroll-snap-type:y mandatory;overflow-y:scroll;overflow-x:hidden}
+  .slide{height:100vh;height:100dvh;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;padding:64px 64px 88px;position:relative;border-bottom:1px solid var(--line)}
+  .inner{max-width:980px;margin:0 auto;width:100%}
+  .kicker{font:500 12px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:0 0 18px}
+  h1.big{font-size:clamp(40px,6vw,76px);line-height:1.04;margin:0 0 20px;letter-spacing:-.01em}
+  h2.head{font-size:clamp(28px,4.2vw,44px);line-height:1.1;margin:0 0 22px;letter-spacing:-.01em}
+  p.lede{font-size:clamp(17px,1.6vw,21px);color:var(--muted);max-width:74ch;margin:0 0 14px}
+  .num{position:absolute;bottom:28px;right:40px;font:500 13px 'IBM Plex Mono',monospace;color:var(--dim)}
+  .progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);z-index:10;transition:width .25s}
+  .dots{position:fixed;right:22px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;z-index:10}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--line);cursor:pointer;transition:background .2s}
+  .dot.active{background:var(--accent)}
+  .grid{display:grid;gap:16px;margin-top:8px}
+  .grid.c2{grid-template-columns:1fr 1fr}
+  .grid.c3{grid-template-columns:repeat(3,1fr)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px 24px}
+  .card h3{font-size:16px;margin:0 0 8px;color:var(--text)}
+  .card p{margin:0;color:var(--muted);font-size:14.5px}
+  .card ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:14.5px}
+  .card li{margin:5px 0}
+  .tag{display:inline-block;font:500 10.5px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:99px;margin:0 6px 6px 0}
+  .t-direct{background:rgba(77,141,255,.18);color:#9cc0ff}
+  .t-indirect{background:rgba(224,169,64,.16);color:#f0c477}
+  .t-us{background:rgba(62,207,142,.16);color:#7fe3b6}
+  .t-risk{background:rgba(255,107,107,.16);color:#ff9d9d}
+  blockquote{margin:0;padding:16px 18px;border-left:3px solid var(--accent);background:var(--panel);border-radius:0 10px 10px 0;color:#d6deea;font-size:15.5px}
+  .quotes{display:grid;gap:10px;margin-top:10px}
+  .statnum{font-family:"Instrument Serif",Georgia,serif;font-size:48px;color:var(--accent);line-height:1}
+  .statrow{display:flex;gap:36px;margin:20px 0}
+  .stat p{margin:4px 0 0;font-size:13px;color:var(--dim)}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;margin-top:10px}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font:500 11px 'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);background:var(--panel2)}
+  td{color:var(--muted)}
+  tr.us td{background:rgba(62,207,142,.06);color:var(--text)}
+  .y{color:var(--good)}.n{color:var(--bad)}.p2{color:var(--warn)}
+  .ladder{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:12px}
+  .rung{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:16px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+  .rung:last-child{border-bottom:none}
+  .rung .rn{font-family:"Instrument Serif",Georgia,serif;font-size:26px;color:var(--accent)}
+  .rung h4{margin:0 0 4px;font-size:15px}
+  .rung p{margin:0;font-size:13.5px;color:var(--muted)}
+  .risk-box{background:linear-gradient(180deg,rgba(255,107,107,.08),rgba(255,107,107,.02));border:1px solid rgba(255,107,107,.35);border-radius:10px;padding:18px 20px;margin-top:14px}
+  .risk-box b{color:var(--text)}
+  .hint{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);font:500 11px 'IBM Plex Mono',monospace;color:var(--dim);letter-spacing:.06em;z-index:10;opacity:.7}
+  @media(max-width:800px){
+    .slide{padding:40px 24px 64px}
+    .grid.c2,.grid.c3{grid-template-columns:1fr}
+    .statrow{flex-wrap:wrap;gap:20px}
+    .dots{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="dots" id="dots"></div>
+<div class="hint">↓ scroll or click the dots</div>
+
+<div id="deck">
+
+<!-- 1. TITLE -->
+<section class="slide" id="s1">
+  <div class="inner">
+    <p class="kicker">ENT 3114 · New Venture Laboratory · Presentation 1</p>
+    <h1 class="big serif">PeptideChecker</h1>
+    <p class="lede">We check what the label can't tell you — an independent guide to FDA-approved peptide medicines, what they really cost, and the legal ways to get them.</p>
+    <div class="statrow">
+      <div class="stat"><span class="mono" style="color:var(--dim);font-size:13px">Founder</span><p style="color:var(--text);font-size:15px">Kevin Cockman</p></div>
+      <div class="stat"><span class="mono" style="color:var(--dim);font-size:13px">Instructor</span><p style="color:var(--text);font-size:15px">Prof. Mark Bole</p></div>
+      <div class="stat"><span class="mono" style="color:var(--dim);font-size:13px">Live site</span><p style="color:var(--text);font-size:15px"><a href="https://cockmankevin-design.github.io/peptidechecker/" style="color:var(--accent)" target="_blank" rel="noopener">peptidechecker</a></p></div>
+    </div>
+  </div>
+  <div class="num">01 / 13</div>
+</section>
+
+<!-- 2. PROBLEM STATEMENT -->
+<section class="slide" id="s2">
+  <div class="inner">
+    <p class="kicker">02 — Problem Statement</p>
+    <h2 class="head serif">Buyers can't tell which peptide sources they can trust — and don't know a legal, approved alternative even exists.</h2>
+    <p class="lede">Someone looking into buying peptides online today has to piece together Google, Reddit, YouTube and social media, and still isn't sure. The certificates of analysis unregulated vendors publish can't be verified — some name a lab that never issued the document, some reuse one file across an entire catalogue — so the one document buyers were taught to trust is the cheapest thing in the market to fake.</p>
+    <p class="lede">Nobody in that search result is pointing them to the fact that FDA-approved versions of several popular peptides already exist, obtainable through a doctor, manufacturer direct-pay, or licensed telehealth.</p>
+  </div>
+  <div class="num">02 / 13</div>
+</section>
+
+<!-- 3. CUSTOMER PERSONA -->
+<section class="slide" id="s3">
+  <div class="inner">
+    <p class="kicker">03 — Customer Persona</p>
+    <h2 class="head serif">Two segments, not one — and they're not the same buyer.</h2>
+    <div class="grid c2">
+      <div class="card">
+        <h3>Gym / peptide users</h3>
+        <p>Current grey-market buyers of compounds like BPC-157 and TB-500. Most of what they actually want has no FDA-approved version yet — the hardest segment to convert to a legal route.</p>
+      </div>
+      <div class="card">
+        <h3>General-health people</h3>
+        <p>Closer to the GLP-1 and telehealth buyer PeptideChecker now actually serves. More likely to accept a licensed, approved alternative if the cost gap is smaller than they assume.</p>
+      </div>
+    </div>
+    <p class="lede" style="margin-top:18px">One real interview completed so far. Course requirement is ten — five gym/peptide users and four general-health people, compared against each other, are still owed.</p>
+  </div>
+  <div class="num">03 / 13</div>
+</section>
+
+<!-- 4. HYPOTHESIS -->
+<section class="slide" id="s4">
+  <div class="inner">
+    <p class="kicker">04 — Hypothesis</p>
+    <h2 class="head serif">We believe buyers will choose the legal route — if the price gap is smaller than they assume, and the guide proves its own honesty.</h2>
+    <p class="lede">Specifically: people who buy unverified research peptides today will switch to an FDA-approved telehealth route once they see it priced against what they're already paying, and once PeptideChecker demonstrates — openly, on its own methodology page — exactly how it checks vendors and that no provider currently pays it a commission.</p>
+    <div class="risk-box"><p style="margin:0;color:var(--muted)"><b>This is the leap-of-faith bet.</b> It fails if buyers already know the real price gap and choose cheaper anyway — which is exactly what the one interview completed so far suggests might happen.</p></div>
+  </div>
+  <div class="num">04 / 13</div>
+</section>
+
+<!-- 5. TEST RESULTS -->
+<section class="slide" id="s5">
+  <div class="inner">
+    <p class="kicker">05 — Test Results</p>
+    <h2 class="head serif">What the interview actually said</h2>
+    <div class="quotes">
+      <blockquote>"I usually have to look through a bunch of different websites and reviews."</blockquote>
+      <blockquote>"I'd definitely use something like that — right now I have to piece all of that information together myself."</blockquote>
+      <blockquote>"I wouldn't want it to just be a list where companies pay to be ranked higher."</blockquote>
+      <blockquote>"I'd rather pay a little more for something I actually trusted."</blockquote>
+    </div>
+    <div class="risk-box">
+      <p style="margin:0 0 6px;color:var(--text)"><b>But also, the honest risk:</b></p>
+      <p style="margin:0;color:var(--muted)">Asked directly whether this interviewee would take the legal telehealth route once they knew it existed, my own read was: <i>"They'd probably go back to the vendors because it's cheaper."</i> The trust problem is real. Whether buyers will actually pay more to solve it legally is still unproven.</p>
+    </div>
+  </div>
+  <div class="num">05 / 13</div>
+</section>
+
+<!-- 5b. KEY CHANGES TO PROBLEM ASSUMPTIONS -->
+<section class="slide" id="s5b">
+  <div class="inner">
+    <p class="kicker">05 — Test Results, continued</p>
+    <h2 class="head serif">Key changes to the problem assumptions</h2>
+    <p class="lede">The original plan was to score and publicly rank grey-market vendors' own certificates of analysis, earning affiliate commission from the vendors that passed. Research into the legal and credibility risk of that model drove a pivot:</p>
+    <div class="grid c2">
+      <div class="card"><h3>Before</h3><p>Verify and rank grey-market research-peptide vendors. Earn commission from the vendors being scored.</p></div>
+      <div class="card"><h3>Now</h3><p>Point buyers to FDA-approved medicines and licensed telehealth instead. Keep a small evidence section explaining why unregulated sellers fail basic checks — no ranking of them, no revenue from them.</p></div>
+    </div>
+    <p class="lede" style="margin-top:14px">The underlying trust problem didn't change. The recommended fix did.</p>
+  </div>
+  <div class="num">05 / 13</div>
+</section>
+
+<!-- 6. SOLUTION -->
+<section class="slide" id="s6">
+  <div class="inner">
+    <p class="kicker">06 — Solution</p>
+    <h2 class="head serif">An independent guide to what's actually approved, what it costs, and how to get it.</h2>
+    <div class="statrow">
+      <div class="stat"><span class="statnum">12</span><p>FDA-approved peptide medicines</p></div>
+      <div class="stat"><span class="statnum">4</span><p>in the pipeline, awaiting a decision</p></div>
+      <div class="stat"><span class="statnum">0</span><p>labs run, products sold, or commissions taken today</p></div>
+    </div>
+    <p class="lede">No score, no black box — a directory, a pipeline tracker, a real cost comparison across every legal route (doctor, manufacturer direct-pay, licensed telehealth), and a plain-language explanation of why the unregulated alternative can't be trusted.</p>
+  </div>
+  <div class="num">06 / 13</div>
+</section>
+
+<!-- 7. COMPETITOR ANALYSIS -->
+<section class="slide" id="s7">
+  <div class="inner">
+    <p class="kicker">07 — Competitor Analysis</p>
+    <h2 class="head serif">Everyone else ranks the grey market. Nobody else points to the legal one.</h2>
+    <div class="tablewrap" style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Site</th><th>Single score?</th><th>Covers FDA-approved routes</th><th>How it earns</th></tr></thead>
+      <tbody>
+        <tr><td>PeptideBenchmark</td><td class="p2">Yes, 0–10</td><td class="n">No — grey-market only</td><td>Sponsored placements, referral codes</td></tr>
+        <tr><td>VialAudit</td><td class="p2">Yes, 0–100</td><td class="n">No — grey-market only</td><td>Affiliate only</td></tr>
+        <tr><td>Reddit / YouTube / Google</td><td>No</td><td class="p2">Sometimes, unreliably</td><td>Ads, creator sponsorships</td></tr>
+        <tr class="us"><td>PeptideChecker</td><td class="y">No — status + checks shown</td><td class="y">Yes — directory, pipeline, cost, routes</td><td>Planned telehealth referral (none yet)</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="lede" style="margin-top:14px"><b style="color:var(--text)">Honestly weaker on:</b> VialAudit has a real, citable 1,816-certificate analysis. PeptideChecker has none yet.</p>
+  </div>
+  <div class="num">07 / 13</div>
+</section>
+
+<!-- 8. HOW IT WORKS -->
+<section class="slide" id="s8">
+  <div class="inner">
+    <p class="kicker">08 — How It Works</p>
+    <h2 class="head serif">Every date and number comes from the FDA's own records.</h2>
+    <div class="grid c2">
+      <div class="card"><h3>Approved &amp; pipeline directory</h3><p>Generic name, approval date, and FDA application number pulled directly from Drugs@FDA for every entry — every row says when it was last checked.</p></div>
+      <div class="card"><h3>Vendor evidence section</h3><p>A seven-point check applied to unregulated vendors' own published certificates: loads, names the lab, the lab confirms it, issued to this vendor, names a lot, matches the page, tested within six months.</p></div>
+    </div>
+    <p class="lede" style="margin-top:14px">No overall score is published for either side — a status plus the checks, shown openly, is the entire product.</p>
+  </div>
+  <div class="num">08 / 13</div>
+</section>
+
+<!-- 9. CUSTOMER RELATIONSHIPS, SALES CHANNELS -->
+<section class="slide" id="s9">
+  <div class="inner">
+    <p class="kicker">09 — Customer Relationships &amp; Sales Channels</p>
+    <h2 class="head serif">Trust earned by showing the work, not by selling anything.</h2>
+    <div class="grid c2">
+      <div class="card"><h3>Relationships</h3><ul>
+        <li>A methodology page anyone can audit</li>
+        <li>States plainly that no provider pays PeptideChecker yet — named, not hidden</li>
+        <li>A public corrections log, started even while empty</li>
+      </ul></div>
+      <div class="card"><h3>Channels</h3><ul>
+        <li>Organic search on high-intent queries ("is [vendor] legit," cost comparisons)</li>
+        <li>The Reddit/forum communities where this question is already being asked</li>
+        <li>A planned weekly email on FDA approvals and pipeline moves</li>
+      </ul></div>
+    </div>
+  </div>
+  <div class="num">09 / 13</div>
+</section>
+
+<!-- 10. KEY ACTIVITIES / RESOURCES / PARTNERS -->
+<section class="slide" id="s10">
+  <div class="inner">
+    <p class="kicker">10 — Key Activities, Resources &amp; Partners</p>
+    <h2 class="head serif">What it takes to keep this real</h2>
+    <div class="grid c3">
+      <div class="card"><h3>Key Activities</h3><ul><li>Pull &amp; verify FDA data on a schedule</li><li>Run the 7-point check on vendor COAs</li><li>Apply to telehealth affiliate programs</li></ul></div>
+      <div class="card"><h3>Key Resources</h3><ul><li>Static site on GitHub Pages — no backend</li><li>Drugs@FDA as the primary data source</li><li>The founder's own time</li></ul></div>
+      <div class="card"><h3>Key Partners</h3><ul><li>Ro, Hims, LifeMD, Noom, PlushCare</li><li class="t-risk" style="display:inline-block;margin-top:4px">None have accepted PeptideChecker yet</li></ul></div>
+    </div>
+  </div>
+  <div class="num">10 / 13</div>
+</section>
+
+<!-- 11. COST STRUCTURE -->
+<section class="slide" id="s11">
+  <div class="inner">
+    <p class="kicker">11 — Cost Structure</p>
+    <h2 class="head serif">Near-zero cash cost. The real cost is time.</h2>
+    <div class="grid c2">
+      <div class="card"><h3>Near zero</h3><p>Hosting on GitHub Pages' free tier, static export, no server, no database beyond what the site itself needs.</p></div>
+      <div class="card"><h3>The real recurring cost</h3><p>Founder time: keeping FDA data current, running the nine remaining customer interviews, and — once a telehealth program accepts — the ongoing compliance work that comes with it.</p></div>
+    </div>
+    <p class="lede" style="margin-top:14px">No lab, no inventory, no payroll, deliberately.</p>
+  </div>
+  <div class="num">11 / 13</div>
+</section>
+
+<!-- 12. CRITICAL FACTORS -->
+<section class="slide" id="s12">
+  <div class="inner">
+    <p class="kicker">12 — Critical Factors</p>
+    <h2 class="head serif">Three things that could end this before it starts.</h2>
+    <div class="grid c3">
+      <div class="card"><span class="tag t-risk">Revenue</span><h3>No affiliate program has accepted PeptideChecker</h3><p>The entire revenue plan depends on at least one telehealth provider saying yes. Zero have so far.</p></div>
+      <div class="card"><span class="tag t-risk">Behavior</span><h3>Will buyers actually switch?</h3><p>The one real interview suggests price, not trust, may still win. The next nine interviews are the real test of the hypothesis on slide four.</p></div>
+      <div class="card"><span class="tag t-risk">Proof</span><h3>No first-party data yet</h3><p>VialAudit can point to 1,816 real certificates it analyzed. PeptideChecker has nothing equivalent published yet.</p></div>
+    </div>
+  </div>
+  <div class="num">12 / 13</div>
+</section>
+
+<!-- 13. OVERALL RECOMMENDATION -->
+<section class="slide" id="s13">
+  <div class="inner">
+    <p class="kicker">13 — Overall Recommendation</p>
+    <h2 class="head serif">Finish the interviews before building anything else.</h2>
+    <div class="ladder">
+      <div class="rung"><div class="rn">1</div><div><h4>Finish the 9 remaining interviews</h4><p>5 gym/peptide users, 4 general-health people — the direct test of whether buyers will actually take the legal route once they see the real price gap.</p></div></div>
+      <div class="rung"><div class="rn">2</div><div><h4>Apply to telehealth affiliate programs, in parallel</h4><p>Ro, Hims, LifeMD, Noom, PlushCare — the slowest thread, and the one the whole revenue plan depends on. Starts now, not after the interviews finish.</p></div></div>
+      <div class="rung"><div class="rn">3</div><div><h4>Publish one small, real dataset</h4><p>Run the 7-point check on 20 well-known vendors' own certificates, with dates and screenshots. Answers VialAudit's data advantage honestly instead of copying its format.</p></div></div>
+    </div>
+  </div>
+  <div class="num">13 / 13</div>
+</section>
+
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const deck = document.getElementById('deck');
+  const progress = document.getElementById('progress');
+  const dotsEl = document.getElementById('dots');
+  slides.forEach((s,i)=>{
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===0?' active':'');
+    d.addEventListener('click', ()=> s.scrollIntoView({behavior:'smooth'}));
+    dotsEl.appendChild(d);
+  });
+  const dots = Array.from(dotsEl.children);
+  function onScroll(){
+    const y = deck.scrollTop, h = window.innerHeight;
+    const idx = Math.round(y / h);
+    progress.style.width = (((idx+1)/slides.length)*100) + '%';
+    dots.forEach((d,i)=> d.classList.toggle('active', i===idx));
+  }
+  deck.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+  window.addEventListener('keydown', (e)=>{
+    const y = deck.scrollTop, h = window.innerHeight;
+    let idx = Math.round(y / h);
+    if(e.key==='ArrowDown'||e.key==='PageDown'||e.key===' '){ idx=Math.min(idx+1, slides.length-1); slides[idx].scrollIntoView({behavior:'smooth'}); e.preventDefault(); }
+    if(e.key==='ArrowUp'||e.key==='PageUp'){ idx=Math.max(idx-1,0); slides[idx].scrollIntoView({behavior:'smooth'}); e.preventDefault(); }
+  });
+  // ?still: jump to last slide at rest, disable smooth scroll, for static review
+  if(location.search.includes('still')){
+    deck.style.scrollBehavior='auto';
+  }
+</script>
+
+</body>
+</html>
